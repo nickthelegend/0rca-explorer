@@ -9,8 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model NetworkConfig {
@@ -19,4 +20,46 @@ model NetworkConfig {
   smartContractAppID  String
 
   @@map("network_configs")
+}
+
+model AgentTestnet {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  creatorName String
+  createdAt   DateTime @default(now())
+  metadata    Json     @default("{}")
+
+  @@map("agents_testnet")
+}
+
+model AgentMainnet {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  creatorName String
+  createdAt   DateTime @default(now())
+  metadata    Json     @default("{}")
+
+  @@map("agents_mainnet")
+}
+
+model TransactionTestnet {
+  id              Int      @id @default(autoincrement())
+  transactionId   String   @unique
+  timestamp       DateTime @default(now())
+  transactionType String
+  network         String   @default("testnet")
+
+  @@map("transactions_testnet")
+}
+
+model TransactionMainnet {
+  id              Int      @id @default(autoincrement())
+  transactionId   String   @unique
+  timestamp       DateTime @default(now())
+  transactionType String
+  network         String   @default("mainnet")
+
+  @@map("transactions_mainnet")
 }
