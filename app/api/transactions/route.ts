@@ -11,8 +11,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ transactions: [], nextToken: null })
     }
 
-    const agents = await fetchAgentAccounts();
-    const { transactions, nextToken: newNextToken } = await fetchLoggingTransactions(agents, nextToken);
+    // We don't strictly need to fetch agents to get transactions, 
+    // but we might want to pass them if we were filtering.
+    // For now, just fetch transactions directly.
+    const { transactions, nextToken: newNextToken } = await fetchLoggingTransactions([], nextToken);
 
     return NextResponse.json({
       transactions,
