@@ -19,12 +19,12 @@ export default function DashboardPage() {
           fetch(`/api/agents?network=${network}`),
           fetch(`/api/transactions?network=${network}`)
         ])
-        
-        const agents = await agentsRes.json()
-        const transactions = await transactionsRes.json()
-        
-        setAgentsCount(agents.length || 0)
-        setTransactionsCount(transactions.length || 0)
+
+        const agentsData = await agentsRes.json()
+        const transactionsData = await transactionsRes.json()
+
+        setAgentsCount(agentsData.count || agentsData.agents?.length || 0)
+        setTransactionsCount(transactionsData.transactions?.length || 0)
       } catch (error) {
         console.error('Failed to fetch data:', error)
       } finally {

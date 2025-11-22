@@ -1,32 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { fetchAgentAccounts, fetchLoggingTransactions } from '@/lib/algorand'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const network = searchParams.get('network')
+    const nextToken = searchParams.get('nextToken') || undefined
 
-    if (!network || (network !== 'testnet' && network !== 'mainnet')) {
-      return NextResponse.json(
-        { error: 'Network parameter is required and must be either "testnet" or "mainnet"' },
-        { status: 400 }
-      )
+    if (network === 'mainnet') {
+      return NextResponse.json({ transactions: [], nextToken: null })
     }
 
-    let transactions
-    if (network === 'testnet') {
-      transactions = await prisma.transactionTestnet.findMany({
-        orderBy: { timestamp: 'desc' }
-      })
-    } else {
-      transactions = await prisma.transactionMainnet.findMany({
-        orderBy: { timestamp: 'desc' }
-      })
-    }
+    const agents = await fetchAgentAccounts();
+    const { transactions, nextToken: newNextToken } = await fetchLoggingTransactions(agents, nextToken);
 
-    return NextResponse.json(transactions)
+    return NextResponse.json({
+      transactions,
+      nextToken: newNextToken
+    })
   } catch (error) {
-    console.error('Database error:', error)
+    console.error('Algorand fetch error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch transactions' },
       { status: 500 }

@@ -27,19 +27,20 @@ export default function AgentsPage() {
     const fetchAgents = async () => {
       try {
         const response = await fetch(`/api/agents?network=${network}`)
-        const agents = await response.json()
-        const formattedAgents = agents.map((agent: any) => ({
+        const data = await response.json()
+        const agentsList = data.agents || []
+        const formattedAgents = agentsList.map((agent: any) => ({
           id: agent.id.toString(),
           name: agent.name,
           author: agent.creatorName,
           description: agent.description,
           status: "active",
-          dateDeployed: new Date(agent.createdAt).toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
+          dateDeployed: new Date(agent.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
           }),
-          assetId: `100${agent.id.toString().padStart(7, '0')}`
+          assetId: `100${agent.id.toString().slice(0, 7)}` // Simplified asset ID generation
         }))
         setAllAgents(formattedAgents)
       } catch (error) {
@@ -93,9 +94,8 @@ export default function AgentsPage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setView("list")}
-                className={`h-10 w-10 rounded-lg ${
-                  view === "list" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white hover:bg-white/5"
-                }`}
+                className={`h-10 w-10 rounded-lg ${view === "list" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white hover:bg-white/5"
+                  }`}
               >
                 <List className="h-5 w-5" />
               </Button>
@@ -103,9 +103,8 @@ export default function AgentsPage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setView("tiles")}
-                className={`h-10 w-10 rounded-lg ${
-                  view === "tiles" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white hover:bg-white/5"
-                }`}
+                className={`h-10 w-10 rounded-lg ${view === "tiles" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white hover:bg-white/5"
+                  }`}
               >
                 <LayoutGrid className="h-5 w-5" />
               </Button>
@@ -137,11 +136,10 @@ export default function AgentsPage() {
                       </h3>
                       <Badge
                         variant="outline"
-                        className={`${
-                          agent.status === "active"
+                        className={`${agent.status === "active"
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                             : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
-                        }`}
+                          }`}
                       >
                         {agent.status}
                       </Badge>
@@ -174,11 +172,10 @@ export default function AgentsPage() {
                 <div className="flex items-start justify-between mb-4">
                   <Badge
                     variant="outline"
-                    className={`${
-                      agent.status === "active"
+                    className={`${agent.status === "active"
                         ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                         : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
-                    }`}
+                      }`}
                   >
                     {agent.status}
                   </Badge>

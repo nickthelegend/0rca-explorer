@@ -10,7 +10,7 @@ import { useNetwork } from "@/contexts/network-context"
 
 
 
-const ITEMS_PER_PAGE = 10
+const ITEMS_PER_PAGE = 18
 
 export default function TransactionsPage() {
   const [view, setView] = useState<"list" | "tiles">("list")
@@ -26,18 +26,19 @@ export default function TransactionsPage() {
     const fetchTransactions = async () => {
       try {
         const response = await fetch(`/api/transactions?network=${network}`)
-        const transactions = await response.json()
+        const data = await response.json()
+        const transactions = data.transactions || []
         const formattedTransactions = transactions.map((tx: any) => ({
-          id: tx.transactionId,
-          type: tx.transactionType,
-          date: new Date(tx.timestamp).toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
+          id: tx.id,
+          type: "Application Call", // Default or infer from tx
+          date: new Date(tx.timestamp * 1000).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
           }),
-          agent: `Agent ${tx.id}`
+          agent: `Agent ${tx.sender.slice(0, 8)}...`
         }))
         setAllTransactions(formattedTransactions)
       } catch (error) {
@@ -92,9 +93,8 @@ export default function TransactionsPage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setView("list")}
-                className={`h-10 w-10 rounded-lg ${
-                  view === "list" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white hover:bg-white/5"
-                }`}
+                className={`h-10 w-10 rounded-lg ${view === "list" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white hover:bg-white/5"
+                  }`}
               >
                 <List className="h-5 w-5" />
               </Button>
@@ -102,9 +102,8 @@ export default function TransactionsPage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setView("tiles")}
-                className={`h-10 w-10 rounded-lg ${
-                  view === "tiles" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white hover:bg-white/5"
-                }`}
+                className={`h-10 w-10 rounded-lg ${view === "tiles" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white hover:bg-white/5"
+                  }`}
               >
                 <LayoutGrid className="h-5 w-5" />
               </Button>
