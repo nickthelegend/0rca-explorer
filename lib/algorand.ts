@@ -29,64 +29,6 @@ export interface AgentData {
   address: string;
 }
 
-// Helper to decode strings from ABI-encoded box content
-function decodeBoxContent(content: Uint8Array): Partial<AgentData> {
-  try {
-    // Heuristic: Look for length-prefixed strings
-    // ABI strings are [2-byte length][bytes]
-    // We scan the buffer for reasonable length prefixes followed by printable characters
-
-    const strings: string[] = [];
-    let i = 0;
-
-    // Skip potential header (offsets) - usually first few bytes are small integers
-    // But we don't know the exact schema, so let's scan.
-
-    while (i < content.length - 2) {
-      // Read 2 bytes as length
-      const len = (content[i] << 8) | content[i + 1];
-
-      // Heuristic: Length should be reasonable (e.g., 1 to 200)
-      // and i + 2 + len should be <= content.length
-      if (len > 0 && len < 200 && i + 2 + len <= content.length) {
-        // Check if bytes are printable ascii
-        let isPrintable = true;
-        for (let j = 0; j < len; j++) {
-          const char = content[i + 2 + j];
-          if (char < 32 || char > 126) {
-            isPrintable = false;
-            break;
-          }
-        }
-
-        if (isPrintable) {
-          const str = Buffer.from(content.slice(i + 2, i + 2 + len)).toString('utf-8');
-          strings.push(str);
-          i += 2 + len;
-          continue;
-        }
-      }
-      i++;
-    }
-
-    // Map found strings to fields based on order/content
-    // Expected: Name, URL, Status
-    let name = "Unknown Agent";
-    let description = "Autonomous Agent on Algorand Testnet";
-    let status = "active";
-
-    if (strings.length > 0) name = strings[0];
-    if (strings.length > 1) description = strings[1]; // URL as description
-    if (strings.length > 2) status = strings[2];
-
-    return { name, description, status };
-
-  } catch (e) {
-    console.warn("Failed to decode box content:", e);
-    return {};
-  }
-}
-
 // 1️⃣ Fetch bnVtYmVy (number of agents)
 export async function fetchNumberOfAgents(): Promise<number> {
   try {
@@ -119,6 +61,10 @@ export async function fetchAgents(): Promise<AgentData[]> {
 
     const agents: AgentData[] = [];
 
+    // Define ABI Type: (string,string,uint64,uint64,uint64,string)
+    // [name, details, fixedPricing, createdAt, appID, creatorName]
+    const agentAbiType = algosdk.ABIType.from("(string,string,uint64,uint64,uint64,string)");
+
     for (const box of boxNames) {
       try {
         // Fix: Cast box to any to handle type inference issues
@@ -136,36 +82,27 @@ export async function fetchAgents(): Promise<AgentData[]> {
 
         const content = await algorand.app.getBoxValue(appId, nameRaw);
 
-        // Decode content
-        const decoded = decodeBoxContent(content);
+        // Decode content using ABI
+        const decoded = agentAbiType.decode(content) as any;
+        // decoded is [name, details, fixedPricing, createdAt, appID, creatorName]
 
-        // Generate ID/Address
-        // Heuristic: If content starts with 32 bytes that look like an address (not all zeros)
-        // Or use box name if it's an integer index
+        const name = decoded[0];
+        const details = decoded[1]; // URL
+        const createdAt = Number(decoded[3]); // uint64 to number
+        const agentAppId = decoded[4].toString();
+        const creatorName = decoded[5];
 
-        const boxIdHex = Buffer.from(nameRaw).toString('hex');
-        let address = boxIdHex;
-
-        // If content is long enough, maybe the first 32 bytes are the address?
-        // The debug output showed content length 115. 
-        // Let's try to encode the first 32 bytes as an address.
-        if (content.length >= 32) {
-          try {
-            const addrBytes = content.slice(0, 32);
-            address = algosdk.encodeAddress(addrBytes);
-          } catch (e) {
-            // Ignore if not a valid address
-          }
-        }
+        // Use the agentAppId as the ID
+        const id = agentAppId;
 
         agents.push({
-          id: address,
-          name: decoded.name || `Agent ${address.slice(0, 8)}...`,
-          creatorName: "Algorand",
-          description: decoded.description || "Autonomous Agent on Algorand Testnet",
-          createdAt: new Date().toISOString(),
-          status: decoded.status || "active",
-          address: address
+          id: id,
+          name: name,
+          creatorName: creatorName,
+          description: details,
+          createdAt: new Date(createdAt * 1000).toISOString(),
+          status: "active",
+          address: algosdk.getApplicationAddress(BigInt(agentAppId))
         });
 
       } catch (e) {
