@@ -42,7 +42,7 @@ export default function AgentsPage() {
             month: 'short',
             day: 'numeric'
           }),
-          assetId: `100${agent.id.toString().slice(0, 7)}` // Simplified asset ID generation
+          assetId: agent.id.toString() // Use App ID directly
         }))
         setAllAgents(formattedAgents)
       } catch (error) {
@@ -151,7 +151,7 @@ export default function AgentsPage() {
 
                   <div className="flex items-center gap-8 flex-shrink-0">
                     <div className="text-center">
-                      <div className="text-xs text-zinc-500 mb-1">Asset ID</div>
+                      <div className="text-xs text-zinc-500 mb-1">App ID</div>
                       <div className="font-mono text-sm text-zinc-400">{agent.assetId}</div>
                     </div>
                     <div className="text-center">
