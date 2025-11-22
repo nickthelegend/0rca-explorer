@@ -139,7 +139,7 @@ export default function TransactionsPage() {
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <a
-                      href={`https://testnet.algoexplorer.io/tx/${tx.id}`}
+                      href={`https://lora.algokit.io/testnet/transaction/${tx.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="font-mono text-sm text-blue-400 hover:text-blue-300 truncate"
@@ -158,7 +158,7 @@ export default function TransactionsPage() {
                       )}
                     </button>
                     <a
-                      href={`https://testnet.algoexplorer.io/tx/${tx.id}`}
+                      href={`https://lora.algokit.io/testnet/transaction/${tx.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
@@ -188,7 +188,7 @@ export default function TransactionsPage() {
                   <div className="text-xs text-zinc-500 mb-2">Transaction ID</div>
                   <div className="flex items-center gap-2">
                     <a
-                      href={`https://testnet.algoexplorer.io/tx/${tx.id}`}
+                      href={`https://lora.algokit.io/testnet/transaction/${tx.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="font-mono text-sm text-blue-400 hover:text-blue-300 truncate"

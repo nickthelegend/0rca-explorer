@@ -4,12 +4,12 @@ import { useNetwork } from "@/contexts/network-context"
 
 export function NetworkInfo() {
   const { network } = useNetwork()
-  
+
   const networkConfig = {
     testnet: {
       name: "Algorand TestNet",
-      appId: "1234567890",
-      assetId: "9876543210"
+      appId: "749655317",
+      assetId: "749653154"
     },
     mainnet: {
       name: "Algorand MainNet",
@@ -17,9 +17,9 @@ export function NetworkInfo() {
       assetId: "1234567890"
     }
   }
-  
+
   const config = networkConfig[network]
-  
+
   return (
     <div className="border-b border-white/5 bg-zinc-950/50">
       <div className="container mx-auto px-6 py-4">

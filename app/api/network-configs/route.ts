@@ -7,7 +7,7 @@ export async function GET() {
       name: 'Testnet',
       algodUrl: 'https://testnet-api.algonode.cloud',
       indexerUrl: 'https://testnet-idx.algonode.cloud',
-      explorerUrl: 'https://testnet.algoexplorer.io'
+      explorerUrl: 'https://lora.algokit.io'
     }
   ])
 }
